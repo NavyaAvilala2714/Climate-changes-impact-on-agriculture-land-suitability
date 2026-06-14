@@ -1,22 +1,32 @@
-# Interpretable Classification (Random Forest)
+# Climate Land Suitability – Python Backend
 
-This package implements the **Interpretable Classification (Random Forest)** model used for cropland suitability prediction, as described in the **Methodology** (section 3) and **ML Insights** page.
+FastAPI + SQLite backend for the Climate Change Land Suitability app. Replaces the Node/Express server.
 
-## What it does
+## Setup
 
-- **Model:** `sklearn.ensemble.RandomForestRegressor` — predicts suitability score (0–100) from:
-  - `region_id`, `scenario_id`
-  - `time_period_future` (0 = current, 1 = future)
-  - `co2_level_ppm` (from scenario)
-  - `latitude`, `longitude` (from region coordinates)
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-- **Interpretability:** The model exposes **feature importance** (`model.feature_importances_`), so we can show which inputs (e.g. CO₂ level, time period, location) drive each prediction.
+## Run
 
-## Files
+```bash
+python -m uvicorn main:app --host 127.0.0.1 --port 5000
+```
 
-- **`random_forest_model.py`** — Trains the model on DB data, exposes `get_feature_importance()` and `train_interpretable_model(training_rows)`.
-- **`__init__.py`** — Re-exports for use in `main.py`.
+- API base: `http://127.0.0.1:5000`
+- Docs: `http://127.0.0.1:5000/docs`
 
-## Usage
+**With the frontend:** Start this backend first, then from the project root run `npm run dev:frontend`. The Vite dev server proxies `/api` to this backend.
 
-Training runs at app startup in `main.py` after the DB is seeded. The API endpoint **GET /api/ml/feature-importance** returns the model name and feature importance; the frontend **ML Insights** page fetches and displays it.
+## API (match frontend)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/regions` | List regions |
+| GET | `/api/regions/{id}` | Get region by id |
+| GET | `/api/scenarios` | List scenarios |
+| GET | `/api/analysis/predict?regionId=&scenarioId=&timePeriod=` | Suitability prediction (returns prediction + region + scenario) |
+
+Database is created and seeded automatically on first run (`climate.db` in this folder). To reseed (e.g. after adding new data), delete `climate.db` and restart the backend.
